@@ -45,6 +45,7 @@ import soot.SootField;
 import soot.Type;
 import soot.tagkit.DoubleConstantValueTag;
 import soot.tagkit.FloatConstantValueTag;
+import soot.tagkit.InitialValueTag;
 import soot.tagkit.IntegerConstantValueTag;
 import soot.tagkit.LongConstantValueTag;
 import soot.tagkit.StringConstantValueTag;
@@ -93,6 +94,36 @@ public class DexField {
     }
   }
 
+  private static void addInitialValueTag(SootField df, Field sf) {
+
+    Object valueObject = null;
+
+    EncodedValue ev = sf.getInitialValue();
+
+    if (ev instanceof BooleanEncodedValue) {
+      valueObject = ((BooleanEncodedValue) ev).getValue() == true ? 1 : 0;
+    } else if (ev instanceof ByteEncodedValue) {
+      valueObject = ((ByteEncodedValue) ev).getValue();
+    } else if (ev instanceof CharEncodedValue) {
+      valueObject = ((CharEncodedValue) ev).getValue();
+    } else if (ev instanceof DoubleEncodedValue) {
+      valueObject = ((DoubleEncodedValue) ev).getValue();
+    } else if (ev instanceof FloatEncodedValue) {
+      valueObject = ((FloatEncodedValue) ev).getValue();
+    } else if (ev instanceof IntEncodedValue) {
+      valueObject = ((IntEncodedValue) ev).getValue();
+    } else if (ev instanceof LongEncodedValue) {
+      valueObject = ((LongEncodedValue) ev).getValue();
+    } else if (ev instanceof ShortEncodedValue) {
+      valueObject = ((ShortEncodedValue) ev).getValue();
+    } else if (ev instanceof StringEncodedValue) {
+      valueObject = ((StringEncodedValue) ev).getValue();
+    }
+
+    if (valueObject != null)
+      df.addTag(new InitialValueTag(valueObject));
+  }
+
   /**
    *
    * @return the Soot equivalent of a field
@@ -104,6 +135,8 @@ public class DexField {
     SootField sf = Scene.v().makeSootField(name, type, flags);
     if (Modifier.isFinal(flags)) {
       DexField.addConstantTag(sf, f);
+    } else if (Modifier.isStatic(flags) && !Modifier.isFinal(flags)) {
+      DexField.addInitialValueTag(sf, f);
     }
     return sf;
   }
