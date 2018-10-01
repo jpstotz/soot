@@ -970,8 +970,8 @@ public class DexBody {
           SootClass exception = ((RefType) t).getSootClass();
           DexlibAbstractInstruction instruction = instructionAtAddress(handler.getHandlerCodeAddress());
           if (!(instruction instanceof MoveExceptionInstruction)) {
-            logger.debug("" + String.format("First instruction of trap handler unit not MoveException but %s",
-                instruction.getClass().getName()));
+              logger.debug("First instruction of trap handler unit not MoveException but {}",
+                      instruction.getClass().getName());
           } else {
             ((MoveExceptionInstruction) instruction).setRealType(this, exception.getType());
           }
