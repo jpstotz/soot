@@ -125,6 +125,11 @@ public class DexMethod {
               "Soot has detected that this method contains invalid Dalvik bytecode,"
                   + " which would have throw an exception at runtime. [" + msg + "]");
           TypeAssigner.v().transform(b);
+        } catch (Exception e) {
+          // Create a new exception which includes the important information where (which SootMethod)
+          // has caused the Exception. Often this information is not included in the Exception
+          // as it is not accessible where the Exception was thrown.
+          throw new RuntimeException("Failed to retrieve body of " + m.getSignature(), e);
         }
         m.setActiveBody(b);
 
