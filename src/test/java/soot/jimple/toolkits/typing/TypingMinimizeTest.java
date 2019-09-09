@@ -36,8 +36,17 @@ public class TypingMinimizeTest {
    *
    * Most common Classes for Typings:
    * 
-   * java.io.Serializable: 4308 java.lang.Comparable: 4163 java.util.RandomAccess: 238 java.util.AbstractList: 138
-   * java.lang.Object: 188 android.view.View: 109 java.util.List: 172 java.lang.Number: 198 java.lang.Cloneable: 102
+   * <pre>
+   * java.io.Serializable: 4308 
+   * java.lang.Comparable: 4163 
+   * java.util.RandomAccess: 238 
+   * java.util.AbstractList: 138
+   * java.lang.Object: 188 
+   * android.view.View: 109 
+   * java.util.List: 172 
+   * java.lang.Number: 198 
+   * java.lang.Cloneable: 102
+   * </pre>
    * 
    * ---> mostly Java and Android Classes (mostly Interfaces)
    *
@@ -49,32 +58,31 @@ public class TypingMinimizeTest {
    * 
    * Most common Typing-Class-Pair:
    * 
-   * 2019-07-10 11:51:26,357 DEBUG DEBUG [main] SootTest.minimize - 2 LocalType: $u8#772 unknown value:java.io.Serializable
-   * 2019-07-10 11:51:26,357 DEBUG DEBUG [main] SootTest.minimize - 2 LocalType: $u2#523 unknown value:java.lang.Comparable
+   * <pre>
+   * 2 LocalType: $u8#772 unknown value:java.io.Serializable
+   * 2 LocalType: $u2#523 unknown value:java.lang.Comparable
    * 
-   * 2019-07-10 12:05:00,399 DEBUG DEBUG [main] SootTest.minimize - 8 LocalType: $u4#62 unknown value:java.io.Serializable
-   * 2019-07-10 12:05:00,399 DEBUG DEBUG [main] SootTest.minimize - 9 LocalType: $u11#39 unknown value:java.lang.Number
-   * 2019-07-10 12:05:00,399 DEBUG DEBUG [main] SootTest.minimize - 9 LocalType: $u2#23 unknown value:java.lang.Comparable
+   * 8 LocalType: $u4#62 unknown value:java.io.Serializable
+   * 9 LocalType: $u11#39 unknown value:java.lang.Number
+   * 9 LocalType: $u2#23 unknown value:java.lang.Comparable
    * 
-   * 2019-07-10 12:04:22,114 DEBUG DEBUG [main] SootTest.minimize - 1 LocalType: $u1#18 unknown value:java.util.RandomAccess
-   * 2019-07-10 12:04:22,114 DEBUG DEBUG [main] SootTest.minimize - 1 LocalType: $u0#7 unknown value:java.util.List
-   * 2019-07-10 12:04:22,114 DEBUG DEBUG [main] SootTest.minimize - 2 LocalType: $u1#18 unknown value:java.util.AbstractList
-   * 2019-07-10 12:14:15,078 DEBUG DEBUG [main] SootTest.minimize - 0 LocalType: $u2#9 unknown value:java.lang.Object
+   * 1 LocalType: $u1#18 unknown value:java.util.RandomAccess
+   * 1 LocalType: $u0#7 unknown value:java.util.List
+   * 2 LocalType: $u1#18 unknown value:java.util.AbstractList
+   * 0 LocalType: $u2#9 unknown value:java.lang.Object
    * 
+   * 0 LocalType: $u1#4 unknown value:java.lang.Cloneable
+   * 1 LocalType: $u1#4 unknown value:java.io.Serializable
+   * 2 LocalType: $u1#4 unknown value:java.util.AbstractMap
    * 
-   * 2019-07-10 12:39:09,881 DEBUG DEBUG [main] SootTest.minimize - 0 LocalType: $u1#4 unknown value:java.lang.Cloneable
-   * 2019-07-10 12:39:09,881 DEBUG DEBUG [main] SootTest.minimize - 1 LocalType: $u1#4 unknown value:java.io.Serializable
-   * 2019-07-10 12:39:09,881 DEBUG DEBUG [main] SootTest.minimize - 2 LocalType: $u1#4 unknown value:java.util.AbstractMap
+   * 0 LocalType: $u0#6 unknown
+   * 1 LocalType: $u0#6 unknown value:com.facebook.ads.internal.view.c.c.c
+   * 2 LocalType: $u0#6 unknown value:android.view.TextureView
    * 
-   * 2019-07-10 12:45:07,040 DEBUG DEBUG [main] SootTest.minimize - 0 LocalType: $u0#6 unknown
-   * value:android.view.TextureView$SurfaceTextureListener 2019-07-10 12:45:07,040 DEBUG DEBUG [main] SootTest.minimize - 1
-   * LocalType: $u0#6 unknown value:com.facebook.ads.internal.view.c.c.c 2019-07-10 12:45:07,040 DEBUG DEBUG [main]
-   * SootTest.minimize - 2 LocalType: $u0#6 unknown value:android.view.TextureView
-   * 
-   * 2019-07-10 12:00:06,403 DEBUG DEBUG [main] SootTest.minimize - 0 LocalType: $u9#8 unknown value:java.lang.Object
-   * 2019-07-10 12:00:06,403 DEBUG DEBUG [main] SootTest.minimize - 1 LocalType: $u9#8 unknown
-   * value:android.widget.ListAdapter 2019-07-10 12:00:06,403 DEBUG DEBUG [main] SootTest.minimize - 2 LocalType: $u9#8
-   * unknown value:android.widget.Adapter
+   * 0 LocalType: $u9#8 unknown value:java.lang.Object
+   * 1 LocalType: $u9#8 unknown
+   * 2 LocalType: $u9#8 unknown value:android.widget.Adapter
+   * </pre>
    * 
    **********************************************
    * 
@@ -206,7 +214,7 @@ public class TypingMinimizeTest {
   @Test
   public void testMostCommonTypingPairs_1() {
 
-    logger.info("Starting Object Random Minimize");
+    logger.debug("Starting Object Random Minimize");
 
     List<Typing> typingList = new ArrayList<>();
     Type Type1 = serializableType;
@@ -232,7 +240,7 @@ public class TypingMinimizeTest {
   @Test
   public void testMostCommonTypingPairs_2() {
 
-    logger.info("Starting Object Random Minimize");
+    logger.debug("Starting Object Random Minimize");
 
     List<Typing> typingList = new ArrayList<>();
 
@@ -294,7 +302,7 @@ public class TypingMinimizeTest {
   @Test
   public void testMostCommonTypingPairs_4() {
 
-    logger.info("Starting Object Random Minimize");
+    logger.debug("Starting Object Random Minimize");
 
     List<Typing> typingList = new ArrayList<>();
 
@@ -388,13 +396,13 @@ public class TypingMinimizeTest {
     Typing.minimize(typingList, new BytecodeHierarchy());
 
     assertEquals(8, typingList.size());
+    
+    TODO
     // assertThat(typingList, containsInAnyOrder(typing2, typing3));
   }
 
   @Test
   public void testAbstractInterfaceTyping() {
-
-    logger.info("Starting Object Random Minimize");
 
     List<Typing> typingList = new ArrayList<>();
 
@@ -421,7 +429,7 @@ public class TypingMinimizeTest {
   @Test
   public void testAbstractAbstractTyping() {
 
-    logger.info("Starting Object Random Minimize");
+    logger.debug("Starting Object Random Minimize");
 
     List<Typing> typingList = new ArrayList<>();
     Local x1 = new JimpleLocal("$x1", null);
@@ -447,8 +455,6 @@ public class TypingMinimizeTest {
   @Test
   public void testJavaInterfaceTyping() {
 
-    logger.info("Starting Object Random Minimize");
-
     List<Typing> typingList = new ArrayList<>();
 
     Local x1 = new JimpleLocal("$x1", null);
@@ -473,8 +479,6 @@ public class TypingMinimizeTest {
 
   @Test
   public void testInterfaceInterfaceTyping() {
-
-    logger.info("Starting Object Random Minimize");
 
     List<Typing> typingList = new ArrayList<>();
 
