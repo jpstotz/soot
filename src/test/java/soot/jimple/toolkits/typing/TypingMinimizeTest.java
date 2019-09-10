@@ -333,9 +333,11 @@ public class TypingMinimizeTest {
   @Test
   public void testHugeCommonTypingPair() {
 
-    // Many Typings with different
-    // really needed, or when needed in bigger form? (16384 Typings = Telegram)
-    // https://www.baeldung.com/java-combinations-algorithm
+    /*
+     * In this test, no minimization can take place with the current minimization method. Because "Serializable" and
+     * "Comparable" are on the same hierarchy level and can be used for any local in any typing. This leads, for example, to
+     * the 16384 typings of the Telegram app.
+     */
 
     List<Typing> typingList = new ArrayList<>();
 
@@ -395,7 +397,7 @@ public class TypingMinimizeTest {
 
     Typing.minimize(typingList, new BytecodeHierarchy());
 
-    assertEquals(8, typingList.size()); 
+    assertEquals(8, typingList.size());
     assertThat(typingList, containsInAnyOrder(typing1, typing2, typing3, typing4, typing5, typing6, typing7, typing8));
   }
 
