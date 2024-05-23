@@ -33,6 +33,7 @@ import java.util.Set;
 
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.formats.ArrayPayload;
+import org.jf.dexlib2.iface.instruction.formats.Instruction11x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction22c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31t;
 import org.jf.dexlib2.iface.reference.TypeReference;
@@ -48,6 +49,7 @@ import soot.FloatType;
 import soot.IntType;
 import soot.Local;
 import soot.LongType;
+import soot.RefType;
 import soot.ShortType;
 import soot.Type;
 import soot.dexpler.DexBody;
@@ -95,10 +97,23 @@ public class FillArrayDataInstruction extends PseudoInstruction {
     List<Number> elements = arrayTable.getArrayElements();
     int numElements = elements.size();
 
+    int elementsWidth = arrayTable.getElementWidth();
+    logger.info("Array elements: count={}, size={}", arrayTable.getArrayElements().size(), arrayTable.getElementWidth());
+
+    Type arrayElementType = detectArrayElementType(body, destRegister, elementsWidth);
+    if (arrayElementType == null) {
+      // WARNING: not stopping here will ignore the fill-array-data command in the generated Jimple code!
+      // -> The Jimple code will then be different from the DEX code!
+      throw new InternalError("Unable to find array type to type array elements!");
+      // logger.warn("Unable to find array type definition to type array elements! " //
+      // + "(obfuscated bytecode?) -> DEX code ignored");
+      // return null;
+    }
+
     Stmt firstAssign = null;
     for (int i = 0; i < numElements; i++) {
       ArrayRef arrayRef = Jimple.v().newArrayRef(arrayReference, IntConstant.v(i));
-      NumericConstant element = getArrayElement(elements.get(i), body, destRegister);
+      NumericConstant element = getArrayElement(elements.get(i), arrayElementType);
       if (element == null) {
         break;
       }
@@ -122,17 +137,41 @@ public class FillArrayDataInstruction extends PseudoInstruction {
 
   }
 
-  private NumericConstant getArrayElement(Number element, DexBody body, int arrayRegister) {
-
+  private Type detectArrayElementType(DexBody body, int arrayRegister, int elementsWidth) {
     List<DexlibAbstractInstruction> instructions = body.instructionsBefore(this);
-    Set<Integer> usedRegisters = new HashSet<Integer>();
+    Set<Integer> usedRegisters = new HashSet<>();
     usedRegisters.add(arrayRegister);
 
+    // Try to recover the array type by going back through the commands that make use of the
+    // register fill-array-data works on
+
+    // if true switch to "rare case mode": if the array fill-array-data works on was not created
+    // but returned by a function.
+    boolean searchForInvocation = false;
     Type elementType = null;
     Outer: for (DexlibAbstractInstruction i : instructions) {
+      if (i instanceof GotoInstruction) {
+        throw new InternalError("Failed to identify the array type. Encountered an unconditional branch");
+      }
+      if (searchForInvocation) {
+        if (!(i instanceof MethodInvocationInstruction)) {
+          throw new InternalError("Method invocation not found that returns the array");
+        }
+        MethodInvocationInstruction invIns = (MethodInvocationInstruction) i;
+        Type aType = invIns.invocation.getMethodRef().getReturnType();
+        if (!(aType instanceof ArrayType)) {
+          throw new InternalError("Failed to identify the array type. The identified method invocation "
+              + "does not return an array type. Invocation: " + invIns.invocation.getMethodRef());
+        }
+        ArrayType arrayType = (ArrayType) aType;
+        elementType = arrayType.getArrayElementType();
+        break Outer;
+      }
       if (usedRegisters.isEmpty()) {
         break;
       }
+      // System.out.println(Integer.toString(i.codeAddress, 16) + " - " + i.getLineNumber());
+      logger.info("testing instruction at {} - {} {}", i.lineNumber, i.getUnit(), i.getClass());
 
       for (int reg : usedRegisters) {
         if (i instanceof NewArrayInstruction) {
@@ -141,7 +180,26 @@ public class FillArrayDataInstruction extends PseudoInstruction {
           if (instruction22c.getRegisterA() == reg) {
             ArrayType arrayType = (ArrayType) DexType.toSoot((TypeReference) instruction22c.getReference());
             elementType = arrayType.getElementType();
+            if (elementType instanceof RefType) {
+              // Most likely this is not the instruction that defines the array that belongs to the the current
+              // fill-array-data instruction. ->manual investigation required
+              logger.trace("Detected new-array-instruction at code_address={} line={} instruction_unit={}", i.codeAddress,
+                  i.lineNumber, instruction22c.getCodeUnits());
+              throw new InternalError(
+                  "New array instruction detection went totally wrong, expected primitive type but got " + elementType);
+            }
+            logger.info("Found new array instruction at {} - {}", newArrayInstruction.lineNumber,
+                newArrayInstruction.getUnit());
             break Outer;
+          }
+        } else if (i instanceof MoveResultInstruction) {
+          MoveResultInstruction movRes = (MoveResultInstruction) i;
+          Instruction11x instruction11x = (Instruction11x) movRes.instruction;
+          if (instruction11x.getRegisterA() == reg) {
+            logger.info("Found moveResult instruction {}", movRes.instruction);
+            searchForInvocation = true;
+            usedRegisters.clear();
+            continue Outer;
           }
         }
       }
@@ -164,15 +222,11 @@ public class FillArrayDataInstruction extends PseudoInstruction {
         }
       }
     }
+    return elementType;
+  }
 
-    if (elementType == null) {
-      // throw new InternalError("Unable to find array type to type array elements!");
-      logger.warn("Unable to find array type to type array elements! Array was not defined! (obfuscated bytecode?)");
-      return null;
-    }
-
+  private NumericConstant getArrayElement(Number element, Type elementType) {
     NumericConstant value;
-
     if (elementType instanceof BooleanType) {
       value = IntConstant.v(element.intValue());
       IntConstant ic = (IntConstant) value;
@@ -195,7 +249,6 @@ public class FillArrayDataInstruction extends PseudoInstruction {
       throw new RuntimeException("Invalid Array Type occured in FillArrayDataInstruction: " + elementType);
     }
     return value;
-
   }
 
   @Override
